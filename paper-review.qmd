@@ -1,0 +1,72 @@
+---
+format: revealjs
+---
+
+## Paper Review
+
+<center>
+
+![<https://doi.org/10.1371/journal.pcbi.1002803>](figures/title-authors.png){width=800}
+
+</center>
+
+
+## Summary
+
+- In Bayesian inference, the **likelihood function** is a key component that connects data to parameter estimates.
+- In simple models, likelihoods are available in analytical form, but sometimes not available for complex models. 
+- _Approximate Bayesian Computation (ABC) rejection_ is an algorithm for generating posterior distributions without need to evaluate a likelihood function.
+- There is a trade-off: added on computation time.
+
+## Bayes' Theorem
+
+
+$$ p(\theta | D) = \frac{p(D | \theta) \times p(\theta)}{p(D)}\qquad \textrm{posterior} = \frac{\textrm{likelihood} \times \textrm{prior}}{\textrm{marginal likelihood}}$$
+
+Likelihood: 
+
+- "probability of the observed data under a particular statistical model", or
+
+- "quantifies the support data lend to particular values of parameters".
+
+## Likelihood
+
+Example: Tossing a fair coin three times and getting two heads
+
+$$p(x = 2 | p_{heads} = 0.5) = 0.5^3 = 0.125$$
+
+```{r}
+curve(dbinom(2, size = 3, prob = x), 
+      from = 0.0, to = 1.0, 
+      xlab = "Probability"
+      )
+
+```
+
+
+## 123 of ABC
+
+1. Data
+2. Generative Model
+3. Priors
+4. Matching criteria
+
+## ABC Rejection Algorithm
+
+## Distance Functions
+
+
+## Summary Statistics
+
+
+## Example
+
+
+## Model Comparison
+
+
+## Pitfalls and Remedies
+
+
+## Take home messages
+
