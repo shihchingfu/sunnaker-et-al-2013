@@ -173,7 +173,9 @@ for (i in 1:N) {
   }
 }
 
-hist(p_posterior)
+hist(p_posterior, freq = FALSE, main = "Posterior", xlab = "p", xlim = c(0,1))
+curve(dbeta(x, 1 + sum(D_true), sample_size - sum(D_true) + 1), 
+      col = "blue", add = TRUE)
 ```
 
 
