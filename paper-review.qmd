@@ -1,72 +1,180 @@
 ---
 format: revealjs
+self-contained: true
 ---
 
 ## Paper Review
 
-<center>
+<center>![](figures/zhang-et-al-2023.png)</center>
 
-![<https://doi.org/10.1371/journal.pcbi.1002803>](figures/title-authors.png){width=800}
+##
 
+<center>![https://doi.org/10.1371/journal.pcbi.1002803](figures/title-authors.png){width="900"}</center>
+
+##
+
+<center>![https://doi.org/10.1016/j.jmp.2012.02.005](figures/title-abstract.png){width="400}
 </center>
 
+## John Tukey (1962)
+
+> Far better an approximate answer to the right question, which is often vague, than the exact answer to the wrong question, which can always be made precise.
+
+::: aside
+John W. Tukey, The Future of Data Analysis, Annals of Mathematical Statistics, 33 (1), 1-67, (March, 1962) DOI: 10.1214/aoms/1177704711 
+:::
 
 ## Summary
 
-- In Bayesian inference, the **likelihood function** is a key component that connects data to parameter estimates.
-- In simple models, likelihoods are available in analytical form, but sometimes not available for complex models. 
-- _Approximate Bayesian Computation (ABC) rejection_ is an algorithm for generating posterior distributions without need to evaluate a likelihood function.
-- There is a trade-off: added on computation time.
+-   In Bayesian inference, the **likelihood function** is a key component that connects data to parameter estimates.
+-   In simple models, likelihoods are available in analytical form, but sometimes not available for complex models.
+-   *Approximate Bayesian Computation (ABC) rejection* is an algorithm for generating **posterior distributions** without needing to evaluate a likelihood function.
+-   There is a trade-off: choice of distance function, extra computation time.
 
 ## Bayes' Theorem
 
+$$ p(\theta | D) = \frac{p(D | \theta) \times p(\theta)}{p(D)}\quad \textrm{posterior} = \frac{\textrm{likelihood} \times \textrm{prior}}{\textrm{marginal likelihood}}$$
 
-$$ p(\theta | D) = \frac{p(D | \theta) \times p(\theta)}{p(D)}\qquad \textrm{posterior} = \frac{\textrm{likelihood} \times \textrm{prior}}{\textrm{marginal likelihood}}$$
+Likelihood (Sunnaker et al. 2013):
 
-Likelihood: 
+-   "probability of the observed data under a particular statistical model"
 
-- "probability of the observed data under a particular statistical model", or
+-   "quantifies the support data lend to particular values of parameters"
 
-- "quantifies the support data lend to particular values of parameters".
+## Likelihood Example
 
-## Likelihood
+What's the probability of getting a head for coin ($p$) that has been observed to come up heads three times ($X = 3$) out of nine tosses ($n = 9$)?
 
-Example: Tossing a fair coin three times and getting two heads
+$$X \sim \mathrm{Binomial}(n, p)\qquad \mathrm{Pr}(X = x; n, p) =  \binom{n}{x}p^x(1-p)^{n-x}$$
 
-$$p(x = 2 | p_{heads} = 0.5) = 0.5^3 = 0.125$$
+```{=tex}
+\begin{aligned}
+\ell(p) &= \mathrm{Pr}(X = 3; n = 9, p = ?)\\
+        &= \frac{9!}{3!(9-3)!}p^3(1-p)^{9-3}\\
+        &= 84p^3(1-p)^6
+\end{aligned}
+```
+## 
 
 ```{r}
-curve(dbinom(2, size = 3, prob = x), 
-      from = 0.0, to = 1.0, 
-      xlab = "Probability"
-      )
+curve(dbinom(3, size = 9, prob = x), 
+      from = 0, to = 1.0,
+      col = "blue", 
+      xlab = "Value of parameter p", y = "Likelihood",
+      main = "Observed three heads out of nine tosses")
+text(x = 1/3, y = 0, labels = "0.333", pos = 1, offset = 1.1, xpd = NA, col = "red")
+abline(v = 1/3, col = "red")
+points(x = c(1/3, 1/3), y = c(dbinom(3, 9, 1/3), -0.01), xpd = NA, col = "red")
 
 ```
 
+. . .
+
+We know the likelihood function from our knowledge of the underlying data generating process, e.g., binomial.
+
+## But...
+
+What if we don't have the likelihood function?
+
+ 
+
+. . .
+
+What if we're not sure how the observed data supports particular values of the parameter we're trying to discover?
+
+ 
+
+. . .
+
+What if our likelihood function is hard to write down explicitly or computationally expensive to evaluate?
+
+## Challenging Likelihoods
+
+-   simulations of the temperature map of the CMB
+
+-   large-scale structure of galaxy distributions
+
+-   mass and luminosity distributions for stars and galaxies
+
+. . .
+
+**Q: Can we sample the posterior without evaluating the likelihood?**
+
+. . .
+
+**YES!** Maybe
+
+::: aside
+Zeljko 2020, "Approximate Bayesian Computation Example --- AstroML Interactive Book."
+:::
 
 ## 123 of ABC
 
-1. Data
-2. Generative Model
-3. Priors
-4. Matching criteria
+ABC replaces the calculation of the likelihood function with simulation.
+
+0.  Data
+1.  Generative Model (parameters $\theta$)
+2.  Priors, $p(\theta)$
+3.  Matching criteria, $\rho(.)$
 
 ## ABC Rejection Algorithm
 
+![](figures/pcbi.1002803.g001.png)
+
+
 ## Distance Functions
 
+Is the simulated data close to the observed data?
 
-## Summary Statistics
+$$\rho(\hat{D},D ) \le \varepsilon$$
+
+Common distances measures include:
+
+- Euclidean distance of every point
+- Summary statistics
+  - e.g., distance between means
+  
+This is a tricky choice which heavily affects computation time.
 
 
 ## Example
 
+```{r}
+
+```
+
 
 ## Model Comparison
 
+Ratio of posterior distributions gives an indication of which model is better supported by the data.
 
-## Pitfalls and Remedies
+$$\frac{p(M_1|D)}{p(M_2|D)} = \frac{p(D|M_1) p(M_1)}{p(D|M_2) p(M_2)} = B_{1,2}\frac{p(M_1)}{p(M_2)}$$
 
+$B_{1,2}$ is known as the **Bayes Factor**.
+
+
+## Some Pitfalls
+
+1. Bias due to non-zero value for $\varepsilon$
+
+    - samples from $p(\theta|\rho(\hat{D}, D) \le \varepsilon)$ rather than $p(\theta|D)$.
+
+2. Many researcher degrees of freedom:
+    - choice of generative model, number of simulations, choice of summary statistics, size of acceptance threshold.
+  
+3. Curse of Dimensionality
+    - data is more spread out, i.e., higher rejection rates
+
+##
+
+![](figures/table2.png)
 
 ## Take home messages
 
+- A method to circumvent intractable or ill-behaved likelihood functions.
+
+- Computationally more expensive than standard Bayesian samplers.
+
+- Choice of the distance function $\rho()$ and tolerance thresholds $\varepsilon$ needs careful attention.
+
+- Not yet feasible for high dimensional problems (work is progress!).
