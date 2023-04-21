@@ -114,10 +114,18 @@ ABC replaces the calculation of the likelihood function with simulation.
 
 0.  Data
 1.  Generative Model (parameters $\theta$)
-2.  Priors, $p(\theta)$
-3.  Matching criteria, $\rho(.)$
+2.  Priors $p(\theta)$
+3.  Matching criteria $\rho() \le \varepsilon$
+
+. . .
+
+We get $p(\theta | D)$ without going through $p(D | \theta)$
 
 ## ABC Rejection Algorithm
+
+![](figures/figure1.png)
+
+## 
 
 ![](figures/pcbi.1002803.g001.png)
 
@@ -140,7 +148,32 @@ This is a tricky choice which heavily affects computation time.
 ## Example
 
 ```{r}
+# Absolute distance
+dist_fn <- function(X, Y) {
+  n <- length(X)
+  return(abs(sum(X)-sum(Y))/n)
+}
 
+epsilon <- 0
+sample_size <- 100
+true_p <- 0.7
+
+D_true <- rbinom(n = sample_size, size = 1, prob = true_p)
+p_posterior <- c()
+
+N <- 10000 # simulations
+
+for (i in 1:N) {
+  p_candidate <- rbeta(1, 1, 1)
+  D_hat <- rbinom(n = sample_size, size = 1, prob = p_candidate)
+  rho <- dist_fn(D_hat, D_true)
+  
+  if (rho <= epsilon) {
+    p_posterior <- c(p_posterior, p_candidate)
+  }
+}
+
+hist(p_posterior)
 ```
 
 
